@@ -8,22 +8,6 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import java.util.UUID;
 
-
-/**
-@Data
-@Entity
-@NoArgsConstructor
-public class Rating {
-	@Id
-	private String id = UUID.randomUUID().toString();
-	private String appointmentId;
-	private String doctorId;
-	private Integer rating;
-	private String comments;
-}
-
-**/
-
 //mark this class as an 'entity class'
 //Use Data annotation to generate boilerplate code
 //Use NoArgsConstructor annotation
@@ -35,4 +19,14 @@ public class Rating {
 	//create rating of type Integer
 	//create comments of type String
 	//Set access modifiers for all these members to 'private'
-	
+@Data
+@Entity
+@NoArgsConstructor
+public class Rating {
+	@Id
+	private String id = UUID.randomUUID().toString();
+	private String appointmentId;
+	private String doctorId;
+	private Integer rating;
+	private String comments;
+}
