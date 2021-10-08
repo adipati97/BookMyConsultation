@@ -44,7 +44,6 @@ public class DoctorService {
 		//Set the address in the doctor object with the response
 		//save the doctor object to the database
 		//return the doctor object
-	/**
 	public Doctor register(Doctor doctor) throws InvalidInputException {
 		ValidationUtils.validate(doctor);
 		if (doctor.getAddress() == null) throw new InvalidInputException(Arrays.asList("Address"));
@@ -59,21 +58,16 @@ public class DoctorService {
 
 		return doctor;
 	}
-	**/
 	
 	//create a method name getDoctor that returns object of type Doctor and has a String paramter called id
 		//find the doctor by id
 		//if doctor is found return the doctor
 		//else throw ResourceUnAvailableException
-
-	/**
 	public Doctor getDoctor(String id) {
 		return Optional
-				.ofNullable(doctorRepository.findById(id)).get()
-				.orElseThrow(ResourceUnAvailableException::new);
+			.ofNullable(doctorRepository.findById(id)).get()
+			.orElseThrow(ResourceUnAvailableException::new);
 	}
-	
-	**/
 
 	public List<Doctor> getAllDoctorsWithFilters(String speciality) {
 
