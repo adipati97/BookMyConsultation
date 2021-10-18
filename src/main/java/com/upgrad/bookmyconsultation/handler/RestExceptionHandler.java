@@ -2,15 +2,7 @@ package com.upgrad.bookmyconsultation.handler;
 
 
 import com.upgrad.bookmyconsultation.controller.ext.ErrorResponse;
-import com.upgrad.bookmyconsultation.exception.ApplicationException;
-import com.upgrad.bookmyconsultation.exception.AuthenticationFailedException;
-import com.upgrad.bookmyconsultation.exception.AuthorizationFailedException;
-import com.upgrad.bookmyconsultation.exception.EntityNotFoundException;
-import com.upgrad.bookmyconsultation.exception.GenericErrorCode;
-import com.upgrad.bookmyconsultation.exception.InvalidInputException;
-import com.upgrad.bookmyconsultation.exception.RestException;
-import com.upgrad.bookmyconsultation.exception.SlotUnavailableException;
-import com.upgrad.bookmyconsultation.exception.UnauthorizedException;
+import com.upgrad.bookmyconsultation.exception.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -112,9 +104,12 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 
 		String message = invalidInputException.getMessage();
 		if (message == null) {
-			message = GenericErrorCode.GEN_001.getDefaultMessage();
+			message = InvalidInputErrorCode.INVALID_INPUT.getDefaultMessage();
 		}
-		return new ErrorResponse().code(GenericErrorCode.GEN_001.getCode()).message(message).rootCause(stringWriter.getBuffer().toString());
+		return new ErrorResponse()
+			.code(InvalidInputErrorCode.INVALID_INPUT.getCode())
+			.message(message)
+			.rootCause(invalidInputException.getAttributeNames().toString());
 	}
 
 }
