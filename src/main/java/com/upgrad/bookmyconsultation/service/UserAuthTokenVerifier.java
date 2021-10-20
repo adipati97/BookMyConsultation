@@ -55,7 +55,7 @@ public final class UserAuthTokenVerifier {
 
 	private boolean isExpired(final UserAuthToken userAuthToken) {
 		final ZonedDateTime now = DateTimeProvider.currentProgramTime();
-		return userAuthToken != null && (userAuthToken.getExpiresAt().isBefore(now) || userAuthToken.getExpiresAt().isEqual(now));
+		return !(now.isBefore(userAuthToken.getExpiresAt()) || now.isEqual(userAuthToken.getExpiresAt()));
 	}
 
 	private boolean isLoggedOut(final UserAuthToken userAuthToken) {

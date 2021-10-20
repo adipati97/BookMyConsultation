@@ -12,6 +12,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.stream.Collectors;
 
 import static org.springframework.http.HttpStatus.FORBIDDEN;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
@@ -109,7 +110,7 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 		return new ErrorResponse()
 			.code(InvalidInputErrorCode.INVALID_INPUT.getCode())
 			.message(message)
-			.rootCause(invalidInputException.getAttributeNames().toString());
+			.invalidInputs(invalidInputException.getAttributeNames());
 	}
 
 }

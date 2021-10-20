@@ -1,12 +1,10 @@
 package com.upgrad.bookmyconsultation.controller.ext;
 
-import java.util.Objects;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import io.swagger.annotations.ApiModel;
+import java.util.*;
+
+import com.fasterxml.jackson.annotation.*;
 import io.swagger.annotations.ApiModelProperty;
 import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
 import javax.validation.constraints.*;
 
 /**
@@ -15,6 +13,8 @@ import javax.validation.constraints.*;
 @Validated
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2021-02-02T16:46:24.234+05:30")
 public class ErrorResponse   {
+	private static final String INVALID_INPUTS = "invalid_inputs";
+
 	@JsonProperty("code")
 	private String code = null;
 
@@ -23,6 +23,9 @@ public class ErrorResponse   {
 
 	@JsonProperty("root_cause")
 	private String rootCause = null;
+
+	@JsonIgnore
+	private Map<String, List<String>> invalidInputs = new HashMap<>();
 
 	public ErrorResponse code(String code) {
 		this.code = code;
@@ -84,6 +87,21 @@ public class ErrorResponse   {
 
 	public void setRootCause(String rootCause) {
 		this.rootCause = rootCause;
+	}
+
+	public ErrorResponse invalidInputs (List<String> invalidInputs) {
+		this.invalidInputs.put(INVALID_INPUTS, invalidInputs);
+		return this;
+	}
+
+	@JsonAnyGetter
+	public Map<String, List<String>> getInvalidInputs () {
+		return this.invalidInputs;
+	}
+
+	@JsonAnySetter
+	public void setInvalidInputs (List<String> invalidInputs) {
+		this.invalidInputs.put(INVALID_INPUTS, invalidInputs);
 	}
 
 
