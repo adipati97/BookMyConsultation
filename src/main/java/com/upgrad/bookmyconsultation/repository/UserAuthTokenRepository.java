@@ -9,7 +9,7 @@ import javax.validation.constraints.NotNull;
 @Repository
 public interface UserAuthTokenRepository extends CrudRepository<UserAuthToken, String> {
 
-	UserAuthToken findFirstByUserEmailId(@NotNull String userId);
+	UserAuthToken findByUserEmailId(@NotNull String userId);
 
 	UserAuthToken findByAccessToken(String token);
 

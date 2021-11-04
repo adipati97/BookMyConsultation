@@ -15,10 +15,14 @@ import java.util.List;
 
 @Component
 public class ValidationUtils {
+	//Regex to validate emails
+	private static final String VALID_EMAIL_REGEX = "^(?=.{1,64}@)[A-Za-z0-9_-]+(\\.[A-Za-z0-9_-]+)*@"
+			+ "[^-][A-Za-z0-9-]+(\\.[A-Za-z0-9-]+)*(\\.[A-Za-z]{2,})$";
 
 	public static void validate(User user) throws InvalidInputException {
 		List<String> errorFields = new ArrayList<>();
-		if (user.getEmailId() == null || !user.getEmailId().matches("^[a-zA-Z0-9_!#$%&’*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$")) {
+		if (user.getEmailId() == null || !user.getEmailId().matches(VALID_EMAIL_REGEX)
+		) {
 			errorFields.add("Email Id");
 		}
 
@@ -52,7 +56,8 @@ public class ValidationUtils {
 		if (doctor.getPan() == null || !doctor.getPan().matches("[A-Z]{5}[0-9]{4}[A-Z]{1}")) {
 			errorFields.add("PAN");
 		}
-		if (doctor.getEmailId() == null || !doctor.getEmailId().matches("^[a-zA-Z0-9_!#$%&’*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$")) {
+		if (doctor.getEmailId() == null || !doctor.getEmailId().matches(VALID_EMAIL_REGEX)
+		) {
 			errorFields.add("Email Id");
 		}
 		if (errorFields.size() > 0) throw new InvalidInputException(errorFields);

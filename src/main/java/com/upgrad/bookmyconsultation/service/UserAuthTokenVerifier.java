@@ -22,14 +22,15 @@ public final class UserAuthTokenVerifier {
 
 	public UserAuthTokenVerifier(final UserAuthToken userAuthToken) {
 
-		if (userAuthToken == null) {
-			status = UserAuthTokenStatus.NOT_FOUND;
+		//Made changes to this logic to ensure that only one entry per user is stored in the user_auth_token table.
+		if (isActive(userAuthToken)) {
+			status = UserAuthTokenStatus.ACTIVE;
 		} else if (isLoggedOut(userAuthToken)) {
 			status = UserAuthTokenStatus.LOGGED_OUT;
 		} else if (isExpired(userAuthToken)) {
 			status = UserAuthTokenStatus.EXPIRED;
 		} else {
-			status = UserAuthTokenStatus.ACTIVE;
+			status = UserAuthTokenStatus.NOT_FOUND;
 		}
 	}
 
@@ -55,11 +56,16 @@ public final class UserAuthTokenVerifier {
 
 	private boolean isExpired(final UserAuthToken userAuthToken) {
 		final ZonedDateTime now = DateTimeProvider.currentProgramTime();
-		return !(now.isBefore(userAuthToken.getExpiresAt()) || now.isEqual(userAuthToken.getExpiresAt()));
+		return userAuthToken != null &&
+			!(now.isBefore(userAuthToken.getExpiresAt()) || now.isEqual(userAuthToken.getExpiresAt()));
 	}
 
 	private boolean isLoggedOut(final UserAuthToken userAuthToken) {
 		return userAuthToken != null && userAuthToken.getLogoutAt() != null;
+	}
+
+	private boolean isActive (final UserAuthToken userAuthToken) {
+		return userAuthToken != null && !isExpired(userAuthToken);
 	}
 
 }
