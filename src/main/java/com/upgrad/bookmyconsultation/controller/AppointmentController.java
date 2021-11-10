@@ -27,6 +27,7 @@ public class AppointmentController {
 	//save the appointment details to the database and save the response from the method used
 	//return http response using ResponseEntity
 
+	//This return type needs to be Appointment as it the response needs to be parsed into a json object in react.
 	@PostMapping
 	public ResponseEntity<Appointment> bookAppointment(@RequestBody Appointment appointment) throws  InvalidInputException {
 		return ResponseEntity.ok(appointmentService.appointment(appointment));

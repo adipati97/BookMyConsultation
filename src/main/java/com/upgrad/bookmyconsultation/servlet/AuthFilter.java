@@ -46,10 +46,13 @@ public class AuthFilter extends ApiFilter {
 				throw new UnauthorizedException(RestErrorCode.ATH_002);
 			}
 
+			//This extra condition has been added as we refresh the token in the backend if it has expired.
 			if (pathInfo.contains("logout") && !authorization.startsWith(BEARER_AUTH_PREFIX)) {
 				throw new UnauthorizedException(RestErrorCode.ATH_004);
 			}
 
+			//This condition has been modified to accommodate all api calls except for login, logout and register as all
+			//of them depend on the Bearer type authentication.
 			if (!pathInfo.contains("login") && !pathInfo.contains("logout")) {
 				final String accessToken = new BearerAuthDecoder(authorization).getAccessToken();
 				try {

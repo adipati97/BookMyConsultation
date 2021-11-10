@@ -22,7 +22,9 @@ public final class UserAuthTokenVerifier {
 
 	public UserAuthTokenVerifier(final UserAuthToken userAuthToken) {
 
-		//Made changes to this logic to ensure that only one entry per user is stored in the user_auth_token table.
+		//The order of execution of the if conditions has been modified to avoid incorrect status.
+		//Ex. A token's expiry status takes priority over the logout out status.
+		//This prevents multiple entries in the user_auth_token table due to token expiry.
 		if (isActive(userAuthToken)) {
 			status = UserAuthTokenStatus.ACTIVE;
 		} else if (isExpired(userAuthToken)) {

@@ -43,6 +43,7 @@ public class AuthTokenService {
 		if (tokenVerifier.isActive()) {
 			return userAuthToken;
 		}
+		//Refresh the token of the user instead of creating a new entry in the user_auth_token table due to token expiry
 		if (tokenVerifier.hasExpired()) {
 			refreshToken(userAuthToken);
 			userAuthDao.save(userAuthToken);
@@ -62,6 +63,12 @@ public class AuthTokenService {
 
 	}
 
+	/**
+	 * Since the auth token is stored in a table with an expiry time, this function is used to refresh the token if it
+	 * has expired. This prevents multiple entries for the same user due to token expiry and allows for a seamless
+	 * user experience.
+	 * @param token {@link UserAuthToken}
+	 */
 	private void refreshToken (UserAuthToken token) {
 		final TokenDateTimeProvider tokenDateTimeProvider = new TokenDateTimeProvider();
 		User user = userRepository.findByEmailId(token.getUser().getEmailId());
@@ -71,6 +78,12 @@ public class AuthTokenService {
 		token.setExpiresAt(tokenDateTimeProvider.getExpiresAt());
 	}
 
+	/**
+	 * Generates a new auth token for the given user.
+	 * @param user The user that is either logging in or logging out.
+	 * @param provider {@link TokenDateTimeProvider}
+	 * @return The generated auth token as a string.
+	 */
 	private String getAuthToken (User user, TokenDateTimeProvider provider) {
 		return new JwtTokenProvider(user.getPassword()).generateToken(
 			user.getEmailId(),
@@ -88,6 +101,7 @@ public class AuthTokenService {
 		if (tokenVerifier.isNotFound()) {
 			throw new AuthorizationFailedException(UserErrorCode.USR_005);
 		}
+		//Refresh the token of the user instead of creating a new entry in the user_auth_token table due to token expiry
 		if (tokenVerifier.hasExpired()) {
 			refreshToken(userAuthToken);
 		}
@@ -100,6 +114,8 @@ public class AuthTokenService {
 	public UserAuthToken validateToken(@NotNull String accessToken) throws AuthorizationFailedException {
 		final UserAuthToken userAuthToken = userAuthDao.findByAccessToken(accessToken);
 		final UserAuthTokenVerifier tokenVerifier = new UserAuthTokenVerifier(userAuthToken);
+		//The order of execution of the if conditions has been modified to avoid incorrect status.
+		//Ex. A token's expiry status takes priority over the logout out status.
 		if (tokenVerifier.isActive()) {
 			return userAuthToken;
 		} else if (tokenVerifier.hasExpired()) {
