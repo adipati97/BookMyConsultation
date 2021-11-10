@@ -3,8 +3,6 @@ package com.upgrad.bookmyconsultation.handler;
 
 import com.upgrad.bookmyconsultation.controller.ext.ErrorResponse;
 import com.upgrad.bookmyconsultation.exception.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -14,7 +12,6 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.stream.Collectors;
 
 import static org.springframework.http.HttpStatus.FORBIDDEN;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
@@ -24,23 +21,19 @@ import static org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY;
 
 @ControllerAdvice
 public class RestExceptionHandler extends ResponseEntityExceptionHandler {
-	Logger logger = LoggerFactory.getLogger(RestExceptionHandler.class);
 
 	@ExceptionHandler(AuthenticationFailedException.class)
 	public final ResponseEntity<ErrorResponse> handleAuthenticationFailedException(AuthenticationFailedException ex, WebRequest request) {
-		logger.info("1");
 		return new ResponseEntity(errorResponse(ex), UNAUTHORIZED);
 	}
 
 	@ExceptionHandler(UnauthorizedException.class)
 	public final ResponseEntity<ErrorResponse> handleUnauthorizedException(UnauthorizedException ex, WebRequest request) {
-		logger.info("2");
 		return new ResponseEntity(errorResponse(ex), UNAUTHORIZED);
 	}
 
 	@ExceptionHandler(AuthorizationFailedException.class)
 	public final ResponseEntity<ErrorResponse> handleAuthorizationFailedException(AuthorizationFailedException ex, WebRequest request) {
-		logger.info("3");
 		return new ResponseEntity(errorResponse(ex), FORBIDDEN);
 	}
 
@@ -123,7 +116,6 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 	}
 
 	private ErrorResponse errorResponse(final UnauthorizedException exception) {
-		logger.info("unauthorized exception");
 		exception.printStackTrace();
 		return new ErrorResponse()
 			.code(exception.getErrorCode().getCode())
@@ -131,7 +123,6 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 	}
 
 	private ErrorResponse errorResponse(final AuthorizationFailedException exception) {
-		logger.info("authorization failed");
 		exception.printStackTrace();
 		return new ErrorResponse()
 			.code(exception.getErrorCode().getCode())
@@ -139,7 +130,6 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 	}
 
 	private ErrorResponse errorResponse(final AuthenticationFailedException exception) {
-		logger.info("authentication failed");
 		exception.printStackTrace();
 		return new ErrorResponse()
 			.code(exception.getErrorCode().getCode())

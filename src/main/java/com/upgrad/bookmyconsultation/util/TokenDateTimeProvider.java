@@ -28,6 +28,6 @@ public class TokenDateTimeProvider {
 
     public TokenDateTimeProvider () {
         setCurrentDateTime(DateTimeProvider.currentProgramTime());
-        setExpiresAt(currentDateTime.plusMinutes(1));
+        setExpiresAt(currentDateTime.plusHours(8));
     }
 }
