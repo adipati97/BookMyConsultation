@@ -19,6 +19,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 import static com.upgrad.bookmyconsultation.constants.ResourceConstants.BASIC_AUTH_PREFIX;
+import static com.upgrad.bookmyconsultation.constants.ResourceConstants.BEARER_AUTH_PREFIX;
 
 @Component
 public class AuthFilter extends ApiFilter {
@@ -45,7 +46,11 @@ public class AuthFilter extends ApiFilter {
 				throw new UnauthorizedException(RestErrorCode.ATH_002);
 			}
 
-			if (!pathInfo.contains("login")) {
+			if (pathInfo.contains("logout") && !authorization.startsWith(BEARER_AUTH_PREFIX)) {
+				throw new UnauthorizedException(RestErrorCode.ATH_004);
+			}
+
+			if (!pathInfo.contains("login") && !pathInfo.contains("logout")) {
 				final String accessToken = new BearerAuthDecoder(authorization).getAccessToken();
 				try {
 					final UserAuthToken userAuthTokenEntity = authTokenService.validateToken(accessToken);

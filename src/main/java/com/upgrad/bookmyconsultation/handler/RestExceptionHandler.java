@@ -3,6 +3,8 @@ package com.upgrad.bookmyconsultation.handler;
 
 import com.upgrad.bookmyconsultation.controller.ext.ErrorResponse;
 import com.upgrad.bookmyconsultation.exception.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -22,19 +24,23 @@ import static org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY;
 
 @ControllerAdvice
 public class RestExceptionHandler extends ResponseEntityExceptionHandler {
+	Logger logger = LoggerFactory.getLogger(RestExceptionHandler.class);
 
 	@ExceptionHandler(AuthenticationFailedException.class)
 	public final ResponseEntity<ErrorResponse> handleAuthenticationFailedException(AuthenticationFailedException ex, WebRequest request) {
+		logger.info("1");
 		return new ResponseEntity(errorResponse(ex), UNAUTHORIZED);
 	}
 
 	@ExceptionHandler(UnauthorizedException.class)
 	public final ResponseEntity<ErrorResponse> handleUnauthorizedException(UnauthorizedException ex, WebRequest request) {
+		logger.info("2");
 		return new ResponseEntity(errorResponse(ex), UNAUTHORIZED);
 	}
 
 	@ExceptionHandler(AuthorizationFailedException.class)
 	public final ResponseEntity<ErrorResponse> handleAuthorizationFailedException(AuthorizationFailedException ex, WebRequest request) {
+		logger.info("3");
 		return new ResponseEntity(errorResponse(ex), FORBIDDEN);
 	}
 
@@ -63,16 +69,16 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 		return new ResponseEntity(errorResponse(e), HttpStatus.BAD_REQUEST);
 	}
 
+	//mark as ExceptionHandler for the class SlotUnavailableException
+	//create a method handleSlotUnavailableException with return type of ResponseEntity
+		//return http response for bad request with error code and a message
 	@ExceptionHandler(SlotUnavailableException.class)
 	public ResponseEntity handleSlotUnavailableException() {
 		return ResponseEntity
 			.badRequest()
 			.body(new ErrorResponse().code("ERR_SLOT_UNAVAILABLE").message("Either the slot is already booked or not available"));
 	}
-	
-	//mark as ExceptionHandler for the class SlotUnavailableException
-	//create a method handleSlotUnavailableException with return type of ResponseEntity
-		//return http response for bad request with error code and a message
+
 
 	private ErrorResponse errorResponse(final ApplicationException exc) {
 		exc.printStackTrace();
@@ -97,6 +103,9 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 		return new ErrorResponse().code(GenericErrorCode.GEN_001.getCode()).message(message).rootCause(stringWriter.getBuffer().toString());
 	}
 
+	/**
+	 * Return a list of attribute that have validation errors as the error response instead of the entire stack trace.
+	 */
 	private ErrorResponse errorResponse(final InvalidInputException invalidInputException) {
 		invalidInputException.printStackTrace();
 
@@ -111,6 +120,30 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 			.code(InvalidInputErrorCode.INVALID_INPUT.getCode())
 			.message(message)
 			.invalidInputs(invalidInputException.getAttributeNames());
+	}
+
+	private ErrorResponse errorResponse(final UnauthorizedException exception) {
+		logger.info("unauthorized exception");
+		exception.printStackTrace();
+		return new ErrorResponse()
+			.code(exception.getErrorCode().getCode())
+			.message(exception.getMessage());
+	}
+
+	private ErrorResponse errorResponse(final AuthorizationFailedException exception) {
+		logger.info("authorization failed");
+		exception.printStackTrace();
+		return new ErrorResponse()
+			.code(exception.getErrorCode().getCode())
+			.message(exception.getMessage());
+	}
+
+	private ErrorResponse errorResponse(final AuthenticationFailedException exception) {
+		logger.info("authentication failed");
+		exception.printStackTrace();
+		return new ErrorResponse()
+			.code(exception.getErrorCode().getCode())
+			.message(exception.getMessage());
 	}
 
 }

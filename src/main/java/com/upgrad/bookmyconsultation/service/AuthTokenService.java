@@ -15,13 +15,13 @@ import com.upgrad.bookmyconsultation.provider.token.JwtTokenProvider;
 import com.upgrad.bookmyconsultation.repository.UserAuthTokenRepository;
 import com.upgrad.bookmyconsultation.repository.UserRepository;
 import com.upgrad.bookmyconsultation.util.DateTimeProvider;
+import com.upgrad.bookmyconsultation.util.TokenDateTimeProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.validation.constraints.NotNull;
-import java.time.ZonedDateTime;
 
 
 @Service
@@ -33,31 +33,50 @@ public class AuthTokenService {
 	@Autowired
 	private UserAuthTokenRepository userAuthDao;
 
-
 	@Transactional(propagation = Propagation.MANDATORY)
 	public UserAuthToken issueToken(final User user) {
 
-		final ZonedDateTime now = DateTimeProvider.currentProgramTime();
+		final TokenDateTimeProvider tokenDateTimeProvider = new TokenDateTimeProvider();
 
 		final UserAuthToken userAuthToken = userAuthDao.findByUserEmailId(user.getEmailId());
 		final UserAuthTokenVerifier tokenVerifier = new UserAuthTokenVerifier(userAuthToken);
 		if (tokenVerifier.isActive()) {
 			return userAuthToken;
 		}
+		if (tokenVerifier.hasExpired()) {
+			refreshToken(userAuthToken);
+			userAuthDao.save(userAuthToken);
+			return userAuthToken;
+		}
 
-		final JwtTokenProvider tokenProvider = new JwtTokenProvider(user.getPassword());
-		final ZonedDateTime expiresAt = now.plusHours(8);
-		final String authToken = tokenProvider.generateToken(user.getEmailId(), now, expiresAt);
+		final String authToken = getAuthToken(user, tokenDateTimeProvider);
 		System.out.println(authToken);
 		final UserAuthToken authTokenEntity = new UserAuthToken();
 		authTokenEntity.setUser(user);
 		authTokenEntity.setAccessToken(authToken);
-		authTokenEntity.setLoginAt(now);
-		authTokenEntity.setExpiresAt(expiresAt);
+		authTokenEntity.setLoginAt(tokenDateTimeProvider.getCurrentDateTime());
+		authTokenEntity.setExpiresAt(tokenDateTimeProvider.getExpiresAt());
 		userAuthDao.save(authTokenEntity);
 
 		return authTokenEntity;
 
+	}
+
+	private void refreshToken (UserAuthToken token) {
+		final TokenDateTimeProvider tokenDateTimeProvider = new TokenDateTimeProvider();
+		User user = userRepository.findByEmailId(token.getUser().getEmailId());
+
+		final String authToken = getAuthToken(user, tokenDateTimeProvider);
+		token.setAccessToken(authToken);
+		token.setExpiresAt(tokenDateTimeProvider.getExpiresAt());
+	}
+
+	private String getAuthToken (User user, TokenDateTimeProvider provider) {
+		return new JwtTokenProvider(user.getPassword()).generateToken(
+			user.getEmailId(),
+			provider.getCurrentDateTime(),
+			provider.getExpiresAt()
+		);
 	}
 
 
@@ -70,7 +89,7 @@ public class AuthTokenService {
 			throw new AuthorizationFailedException(UserErrorCode.USR_005);
 		}
 		if (tokenVerifier.hasExpired()) {
-			throw new AuthorizationFailedException(UserErrorCode.USR_006);
+			refreshToken(userAuthToken);
 		}
 
 		userAuthToken.setLogoutAt(DateTimeProvider.currentProgramTime());
@@ -81,13 +100,15 @@ public class AuthTokenService {
 	public UserAuthToken validateToken(@NotNull String accessToken) throws AuthorizationFailedException {
 		final UserAuthToken userAuthToken = userAuthDao.findByAccessToken(accessToken);
 		final UserAuthTokenVerifier tokenVerifier = new UserAuthTokenVerifier(userAuthToken);
-		if (tokenVerifier.isNotFound() || tokenVerifier.hasLoggedOut()) {
+		if (tokenVerifier.isActive()) {
+			return userAuthToken;
+		} else if (tokenVerifier.hasExpired()) {
+			throw new AuthorizationFailedException(UserErrorCode.USR_006);
+		} else if (tokenVerifier.hasLoggedOut()) {
+			throw new AuthorizationFailedException(UserErrorCode.USR_013);
+		} else {
 			throw new AuthorizationFailedException(UserErrorCode.USR_005);
 		}
-		if (tokenVerifier.hasExpired()) {
-			throw new AuthorizationFailedException(UserErrorCode.USR_006);
-		}
-		return userAuthToken;
 	}
 
 }

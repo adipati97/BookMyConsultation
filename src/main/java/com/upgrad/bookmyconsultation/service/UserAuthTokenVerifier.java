@@ -25,10 +25,10 @@ public final class UserAuthTokenVerifier {
 		//Made changes to this logic to ensure that only one entry per user is stored in the user_auth_token table.
 		if (isActive(userAuthToken)) {
 			status = UserAuthTokenStatus.ACTIVE;
-		} else if (isLoggedOut(userAuthToken)) {
-			status = UserAuthTokenStatus.LOGGED_OUT;
 		} else if (isExpired(userAuthToken)) {
 			status = UserAuthTokenStatus.EXPIRED;
+		} else if (isLoggedOut(userAuthToken)) {
+			status = UserAuthTokenStatus.LOGGED_OUT;
 		} else {
 			status = UserAuthTokenStatus.NOT_FOUND;
 		}
